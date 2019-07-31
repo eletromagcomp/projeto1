@@ -32,7 +32,7 @@ def Criar_Condicao_Inicial(a, b, n):
         x_vect.append(x)
         y_vect.append(y)
     
-    #Garante que duas cargas não caiam na mesma posição
+        #Garante que duas cargas não caiam na mesma posição
         for interacao in range(0,100):
             todas_diferentes = 1
             for j in range(0,i):
