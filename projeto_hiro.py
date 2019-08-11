@@ -87,7 +87,7 @@ def initial_condition_py(a, b, n): #Código do Momo
         Charges.append([x,y])
     return x_vect, y_vect
 ##############################################################
-def distance_charges_np(x, y):
+def distance_charges_np(xy):
     #Calcular a distância entre as cargas.
     
     #A ideia é gerar uma matriz n x n em que cada entrada é 
@@ -96,9 +96,6 @@ def distance_charges_np(x, y):
     
     #Da forma que faço aqui, o elemento (i, j) da matriz não
     #corresponde com a distancia entre i e j, mas isso não importa.
-    xy = np.zeros((n, 2)) 
-    xy[:, 0] = x
-    xy[:, 1] = y
     r = np.zeros((n, n))
     xy_aux = xy 
     
@@ -116,13 +113,13 @@ def distance_charges_np(x, y):
     #Assim, podemos calcular as distancias de todas as combinações (i,j)
     for iteracao in range(n):
         xy_ultimo = xy_aux[-1,:] #Coordenada da última carga
-        xy_ultimo = np.array([xy_ultimo])
-        xy_del = np.delete(xy_aux, -1, axis= 0)
-        xy_aux = np.concatenate((xy_ultimo, xy_del), axis = 0) 
-        r_ij = (xy - xy_aux)**2
-        r_ij = np.sqrt(np.sum(r_ij, axis= 1))
-        r[:, iteracao] = r_ij
-
+        xy_ultimo = np.array([xy_ultimo]) #Fazendo isso para usar o concatenate
+        xy_del = np.delete(xy_aux, -1, axis= 0) #Excluindo a ultima linha em xy_aux
+        xy_aux = np.concatenate((xy_ultimo, xy_del), axis = 0) #Inserindo as coordenadas da última carga no início de xy_aux
+        r_ij = (xy - xy_aux)**2 #Calculando (x - x_aux)^2 e (y - y_aux)^2
+        r_ij = np.sqrt(np.sum(r_ij, axis= 1)) #sqrt((x - x_aux)^2 + (y - y_aux)^2)
+        r[:, iteracao] = r_ij #Inserindo na matriz r
+    
     return r
 #########################SIMULAÇÃO###########################
 a = 100 #Semi eixo maior
@@ -132,21 +129,84 @@ n = 1000 #Número de cargas
 start = time.time()
 
 x, y = inital_condition_np(a,b,n)
-r = distance_charges_np(x,y)
 
-end = time.time()
 
-print('Tempo de simulação (até agora): ' + str(end - start))
+xy = np.zeros((n, 2)) 
+xy[:, 0] = x
+xy[:, 1] = y
+
+r = distance_charges_np(xy)
+
+p = 0.1 #Quantos porcento da nossa amostra iremos mover
 
 ########################PLOT################################
 x_superficie = np.linspace(-a, a, 1000) #Para gerar a superfície
 y_superficie = b*np.sqrt(1-(x_superficie/a)**2)
 
-plt.title("Hiro")
+plt.title("Distribuição inicial")
+plt.xlabel('x')
+plt.ylabel('y')
 plt.plot(x_superficie, y_superficie, color='black')
 plt.plot(x_superficie, -y_superficie, color='black')
-plt.scatter(x, y, s=10, alpha=0.5)
+plt.scatter(x, y, s=5, color='darkblue')
+plt.savefig('distribuicao_inicial.pdf')
 plt.show()
 
 
+
+end = time.time()
+
+print('Tempo de simulação (até agora): ' + str(end - start))
+
+##################################################################################################
+
+#Queremos mover as cargas, mas vamos por a limitação que elas podem se mover apenas em uma direção e sentido:
+#cima, baixo, esquerda e direita
+
+#Para preservar a construção do código, faremos da seguinte forma:
+#1. Qual a direção que a carga vai se mover (horizontal ou vertical)
+#2. Definir qual o sentido do movimento. Se horizontal, ou pra esquerda ou pra direita. Se vertical, cima ou baixo
+#3. Quais partículas irão se mover.
+
+#1.
+direcao = np.zeros((n, 2)) #Primeira coluna é x e segunda é y
+direcao_x = np.random.choice(np.array((0,1)),n) 
+direcao_y = np.where(direcao_x==0, 1, 0) #Aqui fica evidente que vamos mover só na horizontal ou vertical
+direcao[:, 0] = direcao_x 
+direcao[:, 1] = direcao_y
+direcao = direcao.astype(bool) #Mudei para booleano para não ficarmos confusos nos 0's e 1's
+
+
+#2.
+sentido  = np.random.choice(np.array((-1,1)), (n,2)) #Vai gerar ou -1 ou 1 em cada casa. Isso define pra que sentido vamos nos mover
+variacao = np.zeros((n,2))                             
+variacao[:, 0] = np.where(direcao[:, 0]==True, sentido[:, 0], 0) #Aqui fica evidente porque definir a matriz de direções
+variacao[:, 1] = np.where(direcao[:, 1]==True, sentido[:, 1], 0)
+
+#3.
+index_imoveis = np.random.choice(n, int((1-p)*n), replace=False) #Escolhe quais serão as cargas que NÃO irão se mover
+                                                                          #O parâmetro replace nos diz que não queremos elementos repetidos
+variacao[index_imoveis, :] = [0,0] #Pronto, agora temos uma matriz que npos diz pra que lado as partículas vão se mover
+                                    #levando em consideração que nem todas as partículas irão se mover.
+
+
+
+#Vamos agora mover as cargas
+xy_novo = xy + variacao
+
+#Agora devemos aplicar as 3 condições
+#1 - Cargas não podem passar da elipse
+#2 - Cargas não podem se sobrepor
+#3 - A variação de energia causada pela variação deve ser negativa.
+#   Caso seja positiva, o movimento é anulado.
+
+
+#1 -
+#Essa parte só diz que as cargas que passarem da elipse ao fazermos a variação na posição
+#irão voltar pra onde estavam antes (na superfície da elipse)
+elipse = (xy_novo[:, 0]/a)**2 + (xy_novo[:, 1]/b)**2
+index_correcao_elipse = np.where(elipse>1)
+correcao_elipse = np.zeros((n, 2))
+correcao_elipse[index_correcao_elipse, :] = -variacao[index_correcao_elipse, :]
+xy_novo = xy_novo + correcao_elipse
 
