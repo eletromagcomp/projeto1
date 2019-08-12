@@ -58,15 +58,21 @@ def distancia(charge1, charge2, i, j, c, n_u, n_v):
     u1, v1 = u_max*charge1[0]/n_u, 2*np.pi*charge1[1]/n_v
     u2, v2 = u_max*charge2[0]/n_u, 2*np.pi*charge2[1]/n_v
     
-    x1, y1 = c * np.cosh(u1) * np.cos(v1), c * np.sinh(u1) * np.sin(v1)
-    x2, y2 = c * np.cosh(u2) * np.cos(v2), c * np.sinh(u2) * np.sin(v2)
+#    x1, y1 = c * np.cosh(u1) * np.cos(v1), c * np.sinh(u1) * np.sin(v1)
+#    x2, y2 = c * np.cosh(u2) * np.cos(v2), c * np.sinh(u2) * np.sin(v2)
     
     dist1 = (np.cosh(2*u1) + np.cos(2*v1))/2
     dist2 = (np.cosh(2*u2) + np.cos(2*v2))/2
     termo_misto = 2*( np.cosh(u1)*np.cos(v1)*np.cosh(u2)*np.cos(v2) + np.sinh(u1)*np.sin(v1)*np.sinh(u2)*np.sin(v2) )
    
     dist = c * np.sqrt( dist1 + dist2 - termo_misto )
-    distxy = np.sqrt( (x1-x2)**2 + (y1-y2)**2 )
+    if dist == 0:
+        print('################## Dist = 0!! DEU RUIM!!')
+        print(dist1, dist2, termo_misto)
+        print(dist)
+        print(charge1)
+        print(charge2)
+#    distxy = np.sqrt( (x1-x2)**2 + (y1-y2)**2 )
     
     return dist    
 
@@ -101,7 +107,7 @@ def Potencial_1Carga_3d(charges, i, c, n_u, n_v, Carga_Nova = False, nova_carga 
 def one_step(charges, c, n_u, n_v):
     
     #Flag diz se a carga invadiu a casa de outra
-    flag = 1
+    flag = True
     
     #Sorteio da carga a se mover
     i = np.random.randint(len(charges)) 
@@ -128,14 +134,18 @@ def one_step(charges, c, n_u, n_v):
 #    print(charges[i,1], nova_carga[1])
     
 #    if( ( nova_carga[0] <= n_u ) & (nova_carga[0] >= 0 ) & (nova_carga[1] < n_v) & (nova_carga[1] >= 0 ) & (Potencial_1Carga(charges, i, c, Carga_Nova = True, nova_carga = nova_carga) <= Potencial_1Carga(charges, i, c) ) ):
+#    if nova_carga in :
+#        print('AHA!')
+    
     
     for j in range(len(charges)):
         if j == i:
             continue
         if np.array_equal(charges[j], nova_carga):
-            flag = 0
-        if ( (nova_carga[0] == 0) and (nova_carga[1] + charges[j][1] == 100) ):
-            flag = 0
+            flag = False
+        if ( (nova_carga[0] == 0) & (charges[j][0] == 0) & (nova_carga[1] + charges[j][1] == 100) ):
+            print(nova_carga, charges[j])
+            flag = False
             
             
     if flag:
@@ -151,7 +161,7 @@ start = time.time()
 
 a = 100 #Semieixo maior
 b = 50 #Semieixo menor
-n = 50 #Número de cargas
+n = 100 #Número de cargas
 
 n_u = 10 #Número de valores possíveis para coordenada u
 n_v = 100 #Número de valores possíveis para coordenada v
@@ -187,10 +197,9 @@ print('Tempo de simulação (até agora): ' + str(end - start))
 Plot(charges, len(charges), c, u_max, n_u, n_v)
 
 passo = 1
-while passo < 1000:
+while passo < 10000:
     one_step(charges, c, n_u, n_v)
     passo = passo + 1
-#    if np.max(charges[:,0]) > 10: break
 
 end = time.time()
 print('Tempo de simulação (até agora): ' + str(end - start))
