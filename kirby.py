@@ -6,7 +6,7 @@ import math as m
 
 a = 1000
 b = 500
-n = 50
+n = 100
 
 def initial_condition_np(a,b,n):
 
@@ -45,22 +45,40 @@ def pot(charges):
             total = total - pot[i][j]
     return total
     
+#Calcula a variação de potencial da carga movida
+def delta_pot(charges, i):
+    total = 0.0
+    pote = np.zeros(len(charges)-1)
+    for k in range(0,len(charges)-1):
+        if i != k:
+            pote[k] = np.log( np.sqrt( (charges[i][0] - charges[k][0])**2 + (charges[i][1] - charges[k][1])**2 ) )
+            total = total - pote[k]
+        return total
+    
 #Move uma carga só
 def one_step(charges,a,b,c):
     i = np.random.randint(len(charges)) #sorteia a carga a se mover
     R = np.random.randn() #sorteia uma variavel gaussiana
     step = R*(b)**(1-(charges[i][0]/a)**2-(charges[i][1]/b)**2) #normaliza o tamanho do passo em função da distância à superfície
     n = np.random.randint(4)
-    charges_new = charges
+    charges_new = np.copy(charges)
     charges_new[i][0] = charges[i][0] + int(step*np.cos(n*(m.pi)/4))
     charges_new[i][1] = charges[i][1] + int(step*np.sin(n*(m.pi)/4))
+    print(c)
     
-#    pold = pot(charges)
-#    pnew = pot(charges_new)
+    if( ((charges_new[i][0]/a)**2 + (charges_new[i][1]/b)**2 <= 1) & (len(np.unique(charges_new, axis=0)) == len(charges) ) ):
     
-    if( ((charges_new[i][0]/a)**2 + (charges_new[i][1]/b)**2 <= 1) & (pot(charges_new) <= pot(charges)) ):
-        charges = charges_new
-        print(c)
+        pold = delta_pot(charges,i)
+        pnew = delta_pot(charges_new,i)
+
+#        pold = pot(charges)
+#        pnew = pot(charges_new)
+    
+        print(pold, pnew)
+    
+        if(pnew <= pold ):
+            charges[i] = charges_new[i]
+            print(c)
     
 
 #plota distribuição inicial
@@ -72,7 +90,7 @@ def plote(charges):
 charges = initial_condition_np(a,b,n)
 plote(charges)
 c=1
-while c < 5000:
+while c < 15000:
     one_step(charges,a,b,c)
     c = c + 1
 plote(charges)
