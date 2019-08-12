@@ -16,7 +16,7 @@ def initial_condition_np(a, b, n, n_u, n_v, Inserir_Vies = False):
         if Inserir_Vies:
             v = custm.rvs(size = n-m) 
         else:
-            v = np.random.randint(1, n_v + 1, size = n-m)
+            v = np.random.randint(1, n_v, size = n-m)
     
         elementos_novos = np.zeros((n-m,2))
         elementos_novos[:,0] = u
@@ -39,18 +39,18 @@ def Plot(charges, n, c, u_max, n_u, n_v):
     coord_cartesianas[:,1] = c * np.sinh(u_max*charges[:,0]/n_u) * np.sin(charges[:,1]*2*np.pi/n_v)
     
     #Plota cargas
-    plt.scatter(coord_cartesianas[:,0],coord_cartesianas[:,1],s=1)
+    plt.scatter(coord_cartesianas[:,0],coord_cartesianas[:,1],s=4)
     
     #Plota grade de coordenadas elípticas
     t = np.linspace(0, 2*np.pi, 100)
     r = np.linspace(0, 1, 100)
-#    for i in range(n_u):
-#        plt.plot( c*np.cosh(u_max*i/n_u)*np.cos(t), c*np.sinh(u_max*i/n_u)*np.sin(t), 'k', '--', linewidth = 0.2 )
-#    for i in range(n_v):
-#        plt.plot( c*np.cosh(u_max*r)*np.cos(2*np.pi*i/n_v), c*np.sinh(u_max*r)*np.sin(2*np.pi*i/n_v), 'k', '--', linewidth = 0.2 )
+    for i in range(n_u):
+        plt.plot( c*np.cosh(u_max*i/n_u)*np.cos(t), c*np.sinh(u_max*i/n_u)*np.sin(t), 'k', '--', linewidth = 0.2 )
+    for i in range(n_v):
+        plt.plot( c*np.cosh(u_max*r)*np.cos(2*np.pi*i/n_v), c*np.sinh(u_max*r)*np.sin(2*np.pi*i/n_v), 'k', '--', linewidth = 0.2 )
     
-    #Plota limite da elipse condutora
-#    plt.plot(c*np.cosh(u_max)*np.cos(t) , c*np.sinh(u_max)*np.sin(t), 'k' )
+#    Plota limite da elipse condutora
+    plt.plot(c*np.cosh(u_max)*np.cos(t) , c*np.sinh(u_max)*np.sin(t), 'k', linewidth = 0.4 )
 #    plt.show()
 
 
@@ -67,15 +67,6 @@ def distancia(charge1, charge2, i, j, c, n_u, n_v):
    
     dist = c * np.sqrt( dist1 + dist2 - termo_misto )
     distxy = np.sqrt( (x1-x2)**2 + (y1-y2)**2 )
-    
-    if ((dist1 + dist2) <= termo_misto):
-        print('############################################\nDEU RUIM')
-        print(dist1, dist2, termo_misto)
-        print(dist)
-        print(i, j)
-        print(charge1)
-        print(charge2)
-        return 0
     
     return dist    
 
@@ -136,16 +127,19 @@ def one_step(charges, c, n_u, n_v):
 #    print(charges[i,0], nova_carga[0])
 #    print(charges[i,1], nova_carga[1])
     
-#    if( ( nova_carga[0] <= n_u ) & (nova_carga[0] >= 0 ) & (nova_carga[1] <= n_v) & (nova_carga[1] >= 0 ) & (Potencial_1Carga(charges, i, c, Carga_Nova = True, nova_carga = nova_carga) <= Potencial_1Carga(charges, i, c) ) ):
+#    if( ( nova_carga[0] <= n_u ) & (nova_carga[0] >= 0 ) & (nova_carga[1] < n_v) & (nova_carga[1] >= 0 ) & (Potencial_1Carga(charges, i, c, Carga_Nova = True, nova_carga = nova_carga) <= Potencial_1Carga(charges, i, c) ) ):
     
     for j in range(len(charges)):
         if j == i:
             continue
         if np.array_equal(charges[j], nova_carga):
             flag = 0
+        if ( (nova_carga[0] == 0) and (nova_carga[1] + charges[j][1] == 100) ):
+            flag = 0
+            
             
     if flag:
-        if ( (0 <= nova_carga[0] <= n_u) and (0 <= nova_carga[1] <= n_v) ):
+        if ( (0 <= nova_carga[0] <= n_u) and (0 <= nova_carga[1] < n_v) ):
             pot_antigo = Potencial_1Carga(charges, i, c, n_u, n_v)
             pot_novo = Potencial_1Carga(charges, i, c, n_u, n_v, Carga_Nova = True, nova_carga = nova_carga)
             if pot_novo < pot_antigo:
@@ -171,7 +165,7 @@ u_max = np.arccosh(a/c)
 print('A coordenada u tem limite superior: ' + str(u_max))
 
 #Criar distribuição que tira as cargas das extremidades
-xk = np.arange(n_v)+1
+xk = np.arange(n_v)
 nk = np.zeros(n_v)
 nk = 1/(np.abs(np.cos(2*np.pi*xk/n_v))+0.4)
 pk = nk / np.sum(nk)
