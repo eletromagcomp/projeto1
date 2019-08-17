@@ -137,19 +137,19 @@ def campo_eletrico(a, b, charges, condicao, potencial):
         if potencial == 0: #Potencial logaritimo --> campo é 1/r (vetorial r/r**2)
             for k in range(len(charges)):
                 charge_k = charges[k,:]
-                campo[i] = campo[i] + (ponto[i] - charge_k)/((np.sum((ponto[i] - charge_k)**2)))
+                campo[i] = campo[i] + np.true_divide((ponto[i] - charge_k),((np.sum((ponto[i] - charge_k)**2))))
                 
             if condicao == 1:
-                campo[i] = campo[i] + qn*(ponto[i] - ponto_fixo)/(np.sum((ponto[i] - ponto_fixo)**2))
+                campo[i] = campo[i] + qn*np.true_divide((ponto[i] - ponto_fixo),(np.sum((ponto[i] - ponto_fixo)**2)))
             campo[i] = np.sqrt(np.sum(campo[i]**2))
             
         if potencial == 1:#Potencial 1/r --> campo é 1/r**2 (vetorial r/r**3)
             for k in range(len(charges)):
                 charge_k = charges[k,:]
-                campo[i] = campo[i] + (ponto[i]-charge_k)/(np.sum((ponto[i]-charge_k)**3))
+                campo[i] = campo[i] + np.true_divide((ponto[i]-charge_k),(np.sum((ponto[i]-charge_k)**3)))
                 
             if condicao == 1:
-                campo[i] = campo[i] + qn*(ponto[i]-ponto_fixo)/(np.sum((ponto[i]-ponto_fixo)**3))
+                campo[i] = campo[i] + qn*np.true_divide((ponto[i]-ponto_fixo),(np.sum((ponto[i]-ponto_fixo)**3)))
             campo[i] = np.sqrt(np.sum(campo[i]**2))
           
     #Campo passa a ser um array 1D pra poder ser passado pro gráfico, é o campo em módulo
@@ -158,8 +158,6 @@ def campo_eletrico(a, b, charges, condicao, potencial):
     index = np.arange(0,len(campo),2)
     campo = np.delete(campo, index)
     
-    #Ajusta o aspect ratio pra plotar em escala
-    plt.axes().set_aspect('equal')
     #Define malha
     xi = np.linspace(-a, a, 100)
     yi = np.linspace(-b, b, 50)
@@ -218,7 +216,7 @@ a = a()
 b = b()
 n = n()
 
-condicao = 0
+condicao = 1
 potencial = 0
 
 start = time.time()
