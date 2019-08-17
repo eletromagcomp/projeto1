@@ -158,6 +158,8 @@ def campo_eletrico(a, b, charges, condicao, potencial):
     index = np.arange(0,len(campo),2)
     campo = np.delete(campo, index)
     
+    #Ajusta o aspect ratio pra plotar em escala
+    plt.axes().set_aspect('equal')
     #Define malha
     xi = np.linspace(-a, a, 100)
     yi = np.linspace(-b, b, 50)
