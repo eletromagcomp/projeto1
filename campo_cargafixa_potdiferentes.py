@@ -2,6 +2,7 @@
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.mlab import griddata #Para o gráfico colorido
 #%% VARIÁVEIS
 def n(): #Número de cargas
     return 300
@@ -116,11 +117,11 @@ def simulate(a, b, n, charges, condicao, potencial):
 def campo_eletrico(a, b, charges, condicao, potencial):
 
     #Cria os pontos em que serão calculados os campos
-    x = np.arange(-a+1,a-1,10)
-    lim = np.around(b*np.sqrt(1-(x/a)**2))
-    y = np.random.uniform(-1*lim,lim, size = len(x))#Repara que desse jeito ele gera uma distribuição mais densa nas pontas da elipse
+    x = np.arange(-a,a) #x vai ser distribuido com passo 1 de -a até a
+    lim = np.around(b*np.sqrt(1-(x/a)**2)) #calculo os y possível dentro da elípse
+    y = np.random.uniform(-1*lim,lim, size = len(x)) #y será uma resposta aleatória com os seus valores possíveis, a quantidade é igual a quantidade de x
     y = y.astype(int)
-    ponto = np.zeros((len(x),2), dtype = float) #Cria array com as posições das cargas
+    ponto = np.zeros((len(x),2), dtype = float) #Os pontos estão dentro da elipse
     ponto[:,0] = x
     ponto[:,1] = y
     
@@ -132,16 +133,16 @@ def campo_eletrico(a, b, charges, condicao, potencial):
         
         ponto_fixo = [a+20,b+20]
         
-        if potencial == 0:
+        if potencial == 0: #Potencial logaritimo --> campo é 1/r (vetorial r/r**2)
             for k in range(len(charges)):
                 charge_k = charges[k,:]
-                campo[i] = campo[i] + (ponto[i] - charge_k)/(np.sqrt(np.sum((ponto[i] - charge_k)**2)))
+                campo[i] = campo[i] + (ponto[i] - charge_k)/((np.sum((ponto[i] - charge_k)**2)))
                 
             if condicao == 1:
                 campo[i] = campo[i] + qn*(ponto[i] - ponto_fixo)/(np.sum((ponto[i] - ponto_fixo)**2))
             campo[i] = np.sqrt(np.sum(campo[i]**2))
             
-        if potencial == 1:
+        if potencial == 1:#Potencial 1/r --> campo é 1/r**2 (vetorial r/r**3)
             for k in range(len(charges)):
                 charge_k = charges[k,:]
                 campo[i] = campo[i] + (ponto[i]-charge_k)/(np.sum((ponto[i]-charge_k)**3))
@@ -167,13 +168,14 @@ def campo_eletrico(a, b, charges, condicao, potencial):
                       vmax=abs(zi).max(), vmin=-abs(zi).max())
     plt.colorbar()  # draw colorbar
     # plot data points.
-    plt.scatter(ponto[:,0], ponto[:,1], marker='o', s=5, zorder=10)
+    #plt.scatter(ponto[:,0], ponto[:,1], marker='o', s=5, zorder=10) #Apenas para ver os pontos onde foram calculados o campo
     plt.xlim(-a, a)
     plt.ylim(-b, b)
-    plt.title('griddata test (%d points)' )
+    plt.title('Gráfico do campo elétrico' )
     plt.savefig('loucura.png')
-    print(campo,ponto)
+    print(campo[0],ponto[0],campo[len(x)-1],ponto[len(x)-1])
     return campo
+
 
 #%% PLOT
 def plot(a, b, charges_0, charges, condicao):
