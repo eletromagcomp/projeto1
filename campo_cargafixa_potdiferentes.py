@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib.mlab import griddata #Para o gráfico colorido
 #%% VARIÁVEIS
 def n(): #Número de cargas
-    return 300
+    return 100
 
 def a(): #Semi-eixo maior
     return 100
@@ -125,6 +125,7 @@ def campo_eletrico(a, b, charges, condicao, potencial):
     ponto[:,0] = x
     ponto[:,1] = y
     
+    #Array para guardar o campo em cada ponto calculado
     campo = np.zeros((len(x),2),dtype = float)
     
     for i in range(len(x)):
@@ -157,23 +158,24 @@ def campo_eletrico(a, b, charges, condicao, potencial):
     index = np.arange(0,len(campo),2)
     campo = np.delete(campo, index)
     
-    # define grid.
+    #Define malha
     xi = np.linspace(-a, a, 100)
     yi = np.linspace(-b, b, 50)
-    # grid the data.
+    # Coloca os pontos na malha
     zi = griddata(ponto[:,0], ponto[:,1], campo, xi, yi, interp='linear')
-    # contour the gridded data, plotting dots at the nonuniform data points.
+    #Transforma em gráfico colorido
     CS = plt.contour(xi, yi, zi, 15, linewidths=0.5, colors='k')
     CS = plt.contourf(xi, yi, zi, 15,
                       vmax=abs(zi).max(), vmin=-abs(zi).max())
-    plt.colorbar()  # draw colorbar
-    # plot data points.
+    plt.colorbar()  #Barra de cor
+    #Plotando
     #plt.scatter(ponto[:,0], ponto[:,1], marker='o', s=5, zorder=10) #Apenas para ver os pontos onde foram calculados o campo
     plt.xlim(-a, a)
     plt.ylim(-b, b)
     plt.title('Gráfico do campo elétrico' )
-    plt.savefig('loucura.png')
-    print(campo[0],ponto[0],campo[len(x)-1],ponto[len(x)-1])
+    plt.show()
+    #plt.savefig('loucura.png')
+    #print(campo[0],ponto[0],campo[len(x)-1],ponto[len(x)-1])
     return campo
 
 
@@ -214,7 +216,7 @@ a = a()
 b = b()
 n = n()
 
-condicao = 1
+condicao = 0
 potencial = 0
 
 start = time.time()
