@@ -107,7 +107,7 @@ def simulate(a, b, n, charges, condicao, potencial):
             Delta_U_min, min_index = Delta_pot(charges, charge_i, charge_i_new, i, condicao, potencial) #Vou pegar a menor variação energia dentre os movimentos e o índice que causa essa variação
             if Delta_U_min<0:
                 charges[i, :] = charge_i + step*variacao[min_index, :] #Movo a partícula pra a direção que causa maior diminuição da energia
-            elif Delta_U_min==0:
+            elif Delta_U_min>=0:
                 flag = flag + 1 #Se a menor variação de energia da partícula é nula, contamos 1 a mais no flag
                 #Note que o flag reinicia a cada ciclo
                 #Se o número de partículas cuja menor variação de energia é 0 for igual ao número de partículas, alcançamos um mínimo local.
