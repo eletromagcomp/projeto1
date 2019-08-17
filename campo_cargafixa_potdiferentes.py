@@ -115,10 +115,20 @@ def simulate(a, b, n, charges, condicao, potencial):
 
 #%% CAMPO ELETRICO
 def campo_eletrico(a, b, charges, condicao, potencial):
-    ponto = [[0,0],[10,10],[50,-25],[-75,0]]
-    campo = [[0,0],[0,0],[0,0],[0,0]]
+    
+
+    x = np.linspace(-a,a, 100)
+    lim = np.around(b*np.sqrt(1-(x/a)**2))
+    y = np.linspace(-1*lim,lim, 100)#Repara que desse jeito ele gera uma distribuição mais densa nas pontas da elipse
+    y = y.astype(int)
+    ponto = np.zeros((n,2), dtype = int) #Cria array com as posições das cargas
+    ponto[:,0] = x
+    ponto[:,1] = y
+    
+    campo = np.zeros((100,2),dtype = float)
+    
    # ponto = np.array([np.random.randint(-a/2,a/2),np.random.randint(-b/2,b/2)])
-    for i in range(4):
+    for i in range(100):
         
         qn = (len(charges))/2
         
@@ -127,10 +137,10 @@ def campo_eletrico(a, b, charges, condicao, potencial):
         if potencial == 0:
             for k in range(len(charges)):
                 charge_k = charges[k,:]
-                campo[i] = campo[i] + (ponto[i]-charge_k)/(np.sqrt(np.sum((ponto[i]-charge_k)**2)))
+                campo[i] = campo[i] + (ponto[i] - charge_k)/(np.sqrt(np.sum((ponto[i] - charge_k)**2)))
                 
             if condicao == 1:
-                campo[i] = campo[i] + qn*(ponto[i]-ponto_fixo)/(np.sum((ponto[i]-ponto_fixo)**2))
+                campo[i] = campo[i] + qn*(ponto[i] - ponto_fixo)/(np.sum((ponto[i] - ponto_fixo)**2))
             campo[i] = np.sqrt(np.sum(campo[i]**2))
             
         if potencial == 1:
