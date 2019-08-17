@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 #%% VARIÁVEIS
 def n(): #Número de cargas
-    return 100
+    return 300
 
 def a(): #Semi-eixo maior
     return 100
@@ -139,7 +139,7 @@ def campo_eletrico(a, b, charges, condicao, potencial):
         if condicao == 1:
             campo = campo + qn/(np.sum((ponto-ponto_fixo)**2))
         
-    campo = (n*1.44*10**(9))*campo #Correção com constante e cargas
+    #campo = (n*1.44*10**(-9))*campo #Correção com constante e cargas
     
     print(campo,ponto)
     return campo
@@ -181,18 +181,23 @@ a = a()
 b = b()
 n = n()
 
-condicao = 0
+condicao = 1
 potencial = 0
 
 start = time.time()
 
 charges = initial_condition_np(a,b,n)
+
 charges_0 = np.copy(charges)
+
 charges = simulate(a,b,n, charges,condicao,potencial)
+
 campo_inicial = campo_eletrico(a,b,charges_0,condicao,potencial)
+
 campo = campo_eletrico(a,b,charges,condicao,potencial)
 
 end = time.time()
+
 print('Tempo de simulação: ' + str(end - start))
 
 
