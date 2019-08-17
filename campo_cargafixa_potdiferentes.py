@@ -115,34 +115,38 @@ def simulate(a, b, n, charges, condicao, potencial):
 
 #%% CAMPO ELETRICO
 def campo_eletrico(a, b, charges, condicao, potencial):
-    
-    ponto = np.array([np.random.randint(-a/2,a/2),np.random.randint(-b/2,b/2)])
-    campo = 0
-    
-    qn = (len(charges))/2
-    
-    ponto_fixo = [a+20,b+20]
-    
-    if potencial == 0:
-        for k in range(len(charges)):
-            charge_k = charges[k,:]
-            campo = campo + 1/np.sqrt(np.sum((ponto-charge_k)**2))
-            
-        if condicao == 1:
-            campo = campo + qn/np.sqrt(np.sum((ponto-ponto_fixo)**2))
+    ponto = [[0,0],[10,10],[50,-25],[-75,0]]
+    campo = [[0,0],[0,0],[0,0],[0,0]]
+   # ponto = np.array([np.random.randint(-a/2,a/2),np.random.randint(-b/2,b/2)])
+    for i in range(4):
         
-    if potencial == 1:
-        for k in range(len(charges)):
-            charge_k = charges[k,:]
-            campo = campo + 1/(np.sum((ponto-charge_k)**2))
-            
-        if condicao == 1:
-            campo = campo + qn/(np.sum((ponto-ponto_fixo)**2))
+        qn = (len(charges))/2
         
-    #campo = (n*1.44*10**(-9))*campo #Correção com constante e cargas
+        ponto_fixo = [a+20,b+20]
+        
+        if potencial == 0:
+            for k in range(len(charges)):
+                charge_k = charges[k,:]
+                campo[i] = campo[i] + (ponto[i]-charge_k)/(np.sqrt(np.sum((ponto[i]-charge_k)**2)))
+                
+            if condicao == 1:
+                campo[i] = campo[i] + qn*(ponto[i]-ponto_fixo)/(np.sum((ponto[i]-ponto_fixo)**2))
+            campo[i] = np.sqrt(np.sum(campo[i]**2))
+            
+        if potencial == 1:
+            for k in range(len(charges)):
+                charge_k = charges[k,:]
+                campo[i] = campo[i] + (ponto[i]-charge_k)/(np.sum((ponto[i]-charge_k)**3))
+                
+            if condicao == 1:
+                campo[i] = campo[i] + qn*(ponto[i]-ponto_fixo)/(np.sum((ponto[i]-ponto_fixo)**3))
+            campo[i] = np.sqrt(np.sum(campo[i]**2))
+            
+        #campo = (n*1.44*10**(-9))*campo #Correção com constante e cargas
     
     print(campo,ponto)
     return campo
+
 
 #%% PLOT
 def plot(a, b, charges_0, charges, condicao):
