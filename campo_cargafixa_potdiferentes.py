@@ -112,23 +112,21 @@ def simulate(a, b, n, charges, condicao, potencial):
                 #Se o número de partículas cuja menor variação de energia é 0 for igual ao número de partículas, alcançamos um mínimo local.
     return charges
 
-
 #%% CAMPO ELETRICO
 def campo_eletrico(a, b, charges, condicao, potencial):
-    
 
-    x = np.linspace(-a,a, 100)
+    #Cria os pontos em que serão calculados os campos
+    x = np.arange(-a+1,a-1,10)
     lim = np.around(b*np.sqrt(1-(x/a)**2))
-    y = np.linspace(-1*lim,lim, 100)#Repara que desse jeito ele gera uma distribuição mais densa nas pontas da elipse
+    y = np.random.uniform(-1*lim,lim, size = len(x))#Repara que desse jeito ele gera uma distribuição mais densa nas pontas da elipse
     y = y.astype(int)
-    ponto = np.zeros((n,2), dtype = int) #Cria array com as posições das cargas
+    ponto = np.zeros((len(x),2), dtype = float) #Cria array com as posições das cargas
     ponto[:,0] = x
     ponto[:,1] = y
     
-    campo = np.zeros((100,2),dtype = float)
+    campo = np.zeros((len(x),2),dtype = float)
     
-   # ponto = np.array([np.random.randint(-a/2,a/2),np.random.randint(-b/2,b/2)])
-    for i in range(100):
+    for i in range(len(x)):
         
         qn = (len(charges))/2
         
@@ -151,12 +149,31 @@ def campo_eletrico(a, b, charges, condicao, potencial):
             if condicao == 1:
                 campo[i] = campo[i] + qn*(ponto[i]-ponto_fixo)/(np.sum((ponto[i]-ponto_fixo)**3))
             campo[i] = np.sqrt(np.sum(campo[i]**2))
-            
-        #campo = (n*1.44*10**(-9))*campo #Correção com constante e cargas
+          
+    #Campo passa a ser um array 1D pra poder ser passado pro gráfico, é o campo em módulo
     
+    campo = campo.ravel()
+    index = np.arange(0,len(campo),2)
+    campo = np.delete(campo, index)
+    
+    # define grid.
+    xi = np.linspace(-a, a, 100)
+    yi = np.linspace(-b, b, 50)
+    # grid the data.
+    zi = griddata(ponto[:,0], ponto[:,1], campo, xi, yi, interp='linear')
+    # contour the gridded data, plotting dots at the nonuniform data points.
+    CS = plt.contour(xi, yi, zi, 15, linewidths=0.5, colors='k')
+    CS = plt.contourf(xi, yi, zi, 15,
+                      vmax=abs(zi).max(), vmin=-abs(zi).max())
+    plt.colorbar()  # draw colorbar
+    # plot data points.
+    plt.scatter(ponto[:,0], ponto[:,1], marker='o', s=5, zorder=10)
+    plt.xlim(-a, a)
+    plt.ylim(-b, b)
+    plt.title('griddata test (%d points)' )
+    plt.savefig('loucura.png')
     print(campo,ponto)
     return campo
-
 
 #%% PLOT
 def plot(a, b, charges_0, charges, condicao):
