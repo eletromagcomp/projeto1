@@ -181,7 +181,7 @@ def campo_eletrico(a, b, charges, condicao, potencial):
                       vmax=abs(zi).max(), vmin=-abs(zi).max())
     """
     
-    plt.imshow(np.transpose(modulo2),vmin=0, vmax=2) #cria um mapa de calor com o módulo**2 do campo
+    plt.imshow(np.transpose(modulo2),vmin=0, vmax=3) #cria um mapa de calor com o módulo**2 do campo
     plt.colorbar()  #Barra de cor
     #Plotando
     plt.xlim(0, 2*a+10) #por algum motivo o imshow parece plotar o array transposto, então os limites tão trocados
@@ -238,13 +238,15 @@ start = time.time()
 charges = initial_condition_np(a,b,n)
 
 print("####Cargas Distribuídas###################")
+print("Simulando...")
 print("")
 
 charges_0 = np.copy(charges)
 
 charges = simulate(a,b,n, charges,condicao,potencial)
 
-print("Simulação Terminada")
+print("####Simulação Terminada####################")
+print("Calculando Campo...")
 print("")
 
 campo_inicial = campo_eletrico(a,b,charges_0,condicao,potencial)
