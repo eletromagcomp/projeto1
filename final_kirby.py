@@ -184,8 +184,8 @@ def campo_eletrico(a, b, charges, condicao, potencial):
     plt.imshow(modulo2) #cria um mapa de calor com o módulo**2 do campo
     plt.colorbar()  #Barra de cor
     #Plotando
-    plt.xlim(-5, 2*b+5) #por algum motivo o imshow parece plotar o array transposto, então os limites tão trocados
-    plt.ylim(-5, 2*a+5)
+    plt.xlim(0, 2*b+10) #por algum motivo o imshow parece plotar o array transposto, então os limites tão trocados
+    plt.ylim(0, 2*a+10)
     plt.title('Gráfico do campo elétrico' )
     plt.show()
     #plt.savefig('loucura.png')
