@@ -125,13 +125,11 @@ def campo_eletrico(a, b, charges, condicao, potencial):
     y = y + 0.5
     
     ponto = np.zeros((len(x),len(y),2), dtype = float) #cria uma malha de pontos que cobre a elipse e vizinhanças
-#    #agora vamos fazer uma malha deslocada, para não calcular o campo em cima das cargas
-#    ponto[:,0] = x + 0.5
-#    ponto[:,1] = y + 0.5
+
     
-    #Array para guardar o campo em cada ponto calculado
-    campo = np.zeros((len(x),len(y),2),dtype = float)
-    modulo2 = np.zeros((len(x),len(y)), dtype= float)
+    #Array para guardar o campo em cada ponto do espaço
+    campo = np.zeros((len(x),len(y),2),dtype = float) #array do campo (vetorial)
+    modulo2 = np.zeros((len(x),len(y)), dtype= float) #array do módulo quadrado do campo (escalar)
     
     qn = (len(charges))/2
         
@@ -140,13 +138,12 @@ def campo_eletrico(a, b, charges, condicao, potencial):
     for i in range(len(x)):
         for j in range(len(y)):
         
-            print(i,j)
+            print(i,j) #só to printando pra monitorar o andamento durante a execução
             
             ponto[i][j] = np.array([x[i],y[j]])        
             if potencial == 0: #Potencial logaritimo --> campo é 1/r (vetorial r/r**2)
                 for k in range(len(charges)):
                     charge_k = charges[k,:]
-                    #print(charge_k)
                     campo[i][j] = campo[i][j] + (ponto[i][j] - charge_k)/((np.sum((ponto[i][j] - charge_k)**2)))
                     
                 if condicao == 1:
@@ -164,11 +161,13 @@ def campo_eletrico(a, b, charges, condicao, potencial):
             
             modulo2[i][j] = np.sum(campo[i][j]**2)
     """      
+    Isso é parte da função original da Bidu    
+    
     #Campo passa a ser um array 1D pra poder ser passado pro gráfico, é o campo em módulo
     
-#    campo = campo.ravel()
-#    index = np.arange(0,len(campo),2)
-#    campo = np.delete(campo, index)
+    campo = campo.ravel()
+    index = np.arange(0,len(campo),2)
+    campo = np.delete(campo, index)
 
     
     #Define malha
@@ -181,12 +180,12 @@ def campo_eletrico(a, b, charges, condicao, potencial):
     CS = plt.contourf(xi, yi, zi, 15,
                       vmax=abs(zi).max(), vmin=-abs(zi).max())
     """
-    plt.imshow(modulo2)
+    
+    plt.imshow(modulo2) #cria um mapa de calor com o módulo**2 do campo
     plt.colorbar()  #Barra de cor
     #Plotando
-    #plt.scatter(ponto[:,0], ponto[:,1], marker='o', s=5, zorder=10) #Apenas para ver os pontos onde foram calculados o campo
-    plt.xlim(-a-5, a+5)
-    plt.ylim(-b-5, b+5)
+    plt.xlim(-5, 2*b+5) #por algum motivo o imshow parece plotar o array transposto, então os limites tão trocados
+    plt.ylim(-5, 2*a+5)
     plt.title('Gráfico do campo elétrico' )
     plt.show()
     #plt.savefig('loucura.png')
@@ -238,11 +237,15 @@ start = time.time()
 
 charges = initial_condition_np(a,b,n)
 
+print("####Cargas Distribuídas###################")
+print("")
+
 charges_0 = np.copy(charges)
 
 charges = simulate(a,b,n, charges,condicao,potencial)
 
-plot(a, b, charges_0, charges, condicao)
+print("Simulação Terminada")
+print("")
 
 campo_inicial = campo_eletrico(a,b,charges_0,condicao,potencial)
 
@@ -255,4 +258,3 @@ print('Tempo de simulação: ' + str(end - start))
 
 #%% PLOT (LARGE STEP)
 plot(a, b, charges_0, charges, condicao)
-
