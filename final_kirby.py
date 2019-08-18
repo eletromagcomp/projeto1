@@ -138,7 +138,7 @@ def campo_eletrico(a, b, charges, condicao, potencial):
     for i in range(len(x)):
         for j in range(len(y)):
         
-            print(i,j) #só to printando pra monitorar o andamento durante a execução
+            #print(i,j) #só to printando pra monitorar o andamento durante a execução
             
             ponto[i][j] = np.array([x[i],y[j]])        
             if potencial == 0: #Potencial logaritimo --> campo é 1/r (vetorial r/r**2)
@@ -181,11 +181,11 @@ def campo_eletrico(a, b, charges, condicao, potencial):
                       vmax=abs(zi).max(), vmin=-abs(zi).max())
     """
     
-    plt.imshow(modulo2) #cria um mapa de calor com o módulo**2 do campo
+    plt.imshow(np.transpose(modulo2),vmin=0, vmax=2) #cria um mapa de calor com o módulo**2 do campo
     plt.colorbar()  #Barra de cor
     #Plotando
-    plt.xlim(0, 2*b+10) #por algum motivo o imshow parece plotar o array transposto, então os limites tão trocados
-    plt.ylim(0, 2*a+10)
+    plt.xlim(0, 2*a+10) #por algum motivo o imshow parece plotar o array transposto, então os limites tão trocados
+    plt.ylim(0, 2*b+10)
     plt.title('Gráfico do campo elétrico' )
     plt.show()
     #plt.savefig('loucura.png')
